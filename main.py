@@ -13,7 +13,6 @@ users: list =[
 
 ]
 
-# TODO please update users list
 print(f'Witaj {users[0]['name']}!')
 for user in users [1:]:
     print(f'Twój znajomy {user['name']}, z miejscowości {user['city']} opublikował {user['posts']} postów.')
