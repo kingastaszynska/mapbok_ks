@@ -12,3 +12,12 @@ def add_user(userlist:list) ->None:
     new_city:str=(input("proszę podać miasto "))
     new_user: dict = {'name': new_name, 'posts': new_posts, 'city': new_city}
     userlist.append(new_user)
+
+
+def remove_user(userlist:list)->None:
+    user_to_find:str=input('podaj imię do usunięcia: ')
+    for user in users:
+        if user['name'] == user_to_find:
+            print(f'usuwam: {user}')
+            userlist.remove(user)
+
