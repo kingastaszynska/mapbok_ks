@@ -5,6 +5,24 @@ from tkinter import *
 
 import tkintermapview
 
+class User:
+    def __init__(self, imie, nazwisko, postow, lokalizacja):
+        self.imie = imie
+        self.nazwisko = nazwisko
+        self.postow = postow
+        self.lokalizacja = lokalizacja
+
+
+users = [
+    User('Aaa', 'Aaa', '1', 'Aaaa', ),
+    User('Bba', 'Bbb', '4', 'Bbaa', ),
+    User('Ccc', 'Cccc', '8', 'Cccc', )
+]
+
+def show_users():
+    for idx, user in enumerate (users):
+        listbox_lista_obiektow.insert(idx, user.imie)
+
 root=Tk()
 root.geometry("1000x600")
 root.title("Mapbook")
@@ -83,8 +101,7 @@ map_widget.set_position(52.0, 21)
 map_widget.set_zoom(6)
 map_widget.grid(row=3, column=0, columnspan=6)
 
-
-
+show_users()
 
 root.mainloop()
 
