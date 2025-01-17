@@ -1,22 +1,27 @@
 # from mapbook.map_functions import single_user_map, multi_user_map
 # from mapbook.users import users
 # from mapbook.crud import hello, read_users, add_user, remove_user, update_user
+from cProfile import label
 from tkinter import *
 
 import requests
 from bs4 import BeautifulSoup
 import tkintermapview
+import psycopg2 as ps
+
+db_params=ps.connect(user='aaaaaaa',password='aaaaaaa',database='aaaaaaa',
+                     host='localhost',port='5434')
 
 
 
 
 class User:
-    def __init__(self, imie, nazwisko, postow, lokalizacja):
+    def __init__(self, imie, nazwisko, postow, lokalizacja, coordinates):
         self.imie = imie
         self.nazwisko = nazwisko
         self.postow = postow
         self.lokalizacja = lokalizacja
-        self.coords: list = User.get_coordinates(self)
+        self.coords: list = coordinates #User.get_coordinates(self)
         self.marker = map_widget.set_marker(
             self.coords[0],
             self.coords[1],
@@ -40,9 +45,15 @@ users = [
 ]
 
 def show_users():
+    cursor = db_params.cursor()
+    query = "SELECT name, surname, posts, location,st_astext(coordinates), id FROM public.users ORDER BY id ASC"
+    cursor.execute(query)
+    users_db = cursor.fetchall()
+    cursor.close()
     listbox_lista_obiektow.delete(0, END)
-    for idx, user in enumerate (users):
-        listbox_lista_obiektow.insert(idx, f'{user.imie} {user.nazwisko} {user.postow} {user.lokalizacja}')
+    for idx, user in enumerate (users_db):
+        User(user[0], user[1], user[2], user[3], float(user[4][6:-1].split()[1]),(float(user[4][6:-1].split()[0])))
+        listbox_lista_obiektow.insert(idx, f'{user[0]} {user[1]} {user[2]} {user[3]}')
 
 
 def add_user()->None:
@@ -51,7 +62,7 @@ def add_user()->None:
     posts=entry_liczba_postow.get()
     location=entry_lokalizacja.get()
 
-    new_user=User(name, surname, posts, location)
+    new_user=User(name, surname, posts, location, coordinates=[11.0, 20.1])
 
     users.append(new_user)
     show_users()
