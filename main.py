@@ -52,7 +52,7 @@ def show_users():
     cursor.close()
     listbox_lista_obiektow.delete(0, END)
     for idx, user in enumerate (users_db):
-        User(user[0], user[1], user[2], user[3], float(user[4][6:-1].split()[1]),(float(user[4][6:-1].split()[0])))
+        User(user[0], user[1], user[2], user[3], [float(user[4][6:-1].split()[1]),float(user[4][6:-1].split()[0])])
         listbox_lista_obiektow.insert(idx, f'{user[0]} {user[1]} {user[2]} {user[3]}')
 
 
