@@ -29,14 +29,14 @@ class User:
         )
 
 
-    def get_coordinates(self)-> list:
-        url: str = f'https://pl.wikipedia.org/wiki/{self.lokalizacja}'
-        response = requests.get(url)
-        response_html = BeautifulSoup(response.text, 'html.parser')
-        return [
-            float(response_html.select('.latitude')[1].text.replace(',', '.')),
-            float(response_html.select('.longitude')[1].text.replace(',', '.'))
-        ]
+def get_coordinates(location:str)-> list:
+    url: str = f'https://pl.wikipedia.org/wiki/{location}'
+    response = requests.get(url)
+    response_html = BeautifulSoup(response.text, 'html.parser')
+    return [
+        float(response_html.select('.latitude')[1].text.replace(',', '.')),
+        float(response_html.select('.longitude')[1].text.replace(',', '.'))
+    ]
 
 
 users = [
@@ -45,15 +45,21 @@ users = [
 ]
 
 def show_users():
+    for user in users:
+        user.marker.delete()
+    listbox_lista_obiektow.delete(0, END)
     cursor = db_params.cursor()
-    query = "SELECT name, surname, posts, location,st_astext(coordinates), id FROM public.users ORDER BY id ASC"
+    query = "SELECT name, surname, posts, location,st_astext(coordinates), id FROM public.users"
     cursor.execute(query)
     users_db = cursor.fetchall()
     cursor.close()
-    listbox_lista_obiektow.delete(0, END)
+
     for idx, user in enumerate (users_db):
-        User(user[0], user[1], user[2], user[3], [float(user[4][6:-1].split()[1]),float(user[4][6:-1].split()[0])])
+        new_user =User(user[0], user[1], user[2], user[3], [float(user[4][6:-1].split()[1]),float(user[4][6:-1].split()[0])])
         listbox_lista_obiektow.insert(idx, f'{user[0]} {user[1]} {user[2]} {user[3]}')
+        users.append(new_user)
+        print(new_user)
+    print(users)
 
 
 def add_user()->None:
@@ -62,9 +68,13 @@ def add_user()->None:
     posts=entry_liczba_postow.get()
     location=entry_lokalizacja.get()
 
-    new_user=User(name, surname, posts, location, coordinates=[11.0, 20.1])
+    longitude, latitude =get_coordinates(location)
+    cursor = db_params.cursor()
+    query = f"INSERT INTO public.users(	name, surname, posts, location, coordinates) VALUES ('{name}', '{surname}', {posts}, '{location}', 'SRID=4326;POINT( {latitude} {longitude})');"
+    cursor.execute(query)
+    db_params.commit()
+    cursor.close()
 
-    users.append(new_user)
     show_users()
     entry_imie.delete(0, END)
     entry_nazwisko.delete(0, END)
@@ -75,6 +85,13 @@ def add_user()->None:
 
 def delete_user()->None:
     i=listbox_lista_obiektow.index(ACTIVE)
+
+    print(users[i].__dict__)
+    cursor = db_params.cursor()
+    query = f"DELETE FROM public.users WHERE surname='{users[i].nazwisko}';"
+    cursor.execute(query)
+    db_params.commit()
+    cursor.close()
     users[i].marker.delete()
     users.pop(i)
     show_users()
